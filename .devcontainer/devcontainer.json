@@ -1,0 +1,24 @@
+{
+  "name": "deno-neovim-devcontainer",
+  "build": {
+    "dockerfile": "Containerfile",
+    "context": "."
+  },
+  "remoteUser": "deno",
+  "containerEnv": {
+    "SHELL": "/bin/sh"
+  },
+  "customizations": {
+    "devpod": {
+      "provider": "docker"
+    }
+  },
+  "portsAttributes": {
+    "8000": {
+      "label": "Deno Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "runArgs": ["-p", "8000:8000"],
+  "workspaceFolder": "/home/deno/workspace"
+}

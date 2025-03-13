@@ -1,0 +1,8 @@
+FROM denoland/deno:alpine-2.2.3
+
+# Switch to root to install packages
+USER root
+RUN apk update && apk add --no-cache neovim git curl
+
+# Switch back to deno user
+USER deno
