@@ -1,8 +1,52 @@
-FROM denoland/deno:alpine-2.2.3
+# FROM denoland/deno:debian-2.2.4
+#
+# # Run as root to remove existing /deno-dir
+# USER root
+# # Here we are deleting deno-dir and recrteating it. Becuase the default deno user has a ID of 1993:1993. But with the --userns=keep-ids flag the ID has to be 1000:1000 (the ID of the host user)
+# RUN rm -rf /deno-dir && mkdir -p /deno-dir && chown -R 1000:1000 /deno-dir
+#
+# # Switch to deno user and create fresh /deno-dir
+# USER deno
 
-# Switch to root to install packages
-USER root
-RUN apk update && apk add --no-cache neovim git curl
+# Use Debian Bookworm Slim as the base image
+FROM debian:bookworm-slim
 
-# Switch back to deno user
-USER deno
+# Set environment variables to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install curl (needed for Deno installation) and clean up
+RUN apt-get update && apt-get install -y \
+    curl \
+    unzip \
+    && rm -rf /var/lib/apt/lists/* 
+
+# Install Deno
+RUN curl -fsSL https://deno.land/install.sh | sh \
+    && mv /root/.deno/bin/deno /usr/local/bin/deno 
+
+# Create the 'dev' user with UID/GID 1000:1000
+ARG USERNAME=dev
+ARG USER_UID=1000
+ARG GROUPNAME=dev
+ARG USER_GID=1000
+
+RUN groupadd --gid $USER_GID $GROUPNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME 
+
+# # Create and set ownership of /deno-dir for the dev user
+# RUN mkdir -p /deno-dir/ \
+#     && chown -R $USER_UID:$USER_GID /deno-dir/
+
+# Create and set ownership of /deno-dir and workspace directory for the dev user
+RUN mkdir -p /deno-dir /home/$USERNAME/workspace \
+    && chown -R $USER_UID:$USER_GID /deno-dir /home/$USERNAME/workspace
+
+
+# Switch to the 'dev' user
+USER $USERNAME
+
+# Set the working directory
+WORKDIR /home/$USERNAME/workspace 
+
+# Set Deno directory environment variable
+ENV DENO_DIR=/deno-dir/
