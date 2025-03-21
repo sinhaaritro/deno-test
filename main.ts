@@ -14,7 +14,7 @@ const oak: Tree = {
   id: "3",
   species: "oak",
   age: 3,
-  location: "Jim's Park",
+  location: "The Park",
 };
 
 await kv.set(["trees", oak.id], oak);
@@ -64,6 +64,10 @@ app.get("/", async (c) => {
   return c.json({
     message: `Hi this is working`,
   });
+});
+
+app.get("/health", (c) => {
+  return c.json({ status: "healthy" }, 200);
 });
 
 Deno.serve({ port: 8000, hostname: "0.0.0.0" }, app.fetch);
