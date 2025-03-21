@@ -1,27 +1,30 @@
 version: "3.8"
+# - Specifies Docker Compose version for compatibility
 
 services:
   app:
     build:
-      context: .
-      dockerfile: Containerfile
-    image: deno-app:production
+      context: .  # Build context is the project root
+      dockerfile: Containerfile  # Uses the production Containerfile
+    image: deno-app:production  # Tags the built image
     ports:
-      - "8000:8000"
+      - "8000:8000"  # Maps host port 8000 to container port 8000
     environment:
-      - DENO_DIR=/deno-dir/
+      - DENO_DIR=/deno-dir/  # Sets Deno cache directory
     volumes:
-      - deno-data:/deno-dir
-    restart: unless-stopped
-    user: "1001:1001"  # Matches USER_UID:USER_GID from Containerfile
+      - deno-data:/deno-dir  # Persists Deno cache across restarts
+    restart: unless-stopped  # Restarts container unless manually stopped
+    user: "1001:1001"  # Runs as UID:GID from Containerfile
+    # - Overrides CMD with necessary permissions
     command: ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "main.ts"]
     healthcheck:
+      # - Checks the /health endpoint; fails if not 2xx
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      interval: 30s  # How often to check
+      timeout: 5s    # Max time to wait for response
+      retries: 3     # Number of retries before unhealthy
+      start_period: 10s  # Grace period for startup
 
 volumes:
   deno-data:
-    driver: local
+    driver: local  # Local volume for Deno cache persistence

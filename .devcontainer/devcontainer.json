@@ -2,25 +2,29 @@
   "name": "devcontainer",
   "build": {
     "dockerfile": "Containerfile",
-    "context": "."
+    "context": "." // Uses the .devcontainer directory as build context
   },
-  "features": {},
-  "remoteUser": "dev",
+  "features": {}, // No additional DevContainer features needed
+  "remoteUser": "dev", // Runs as the 'dev' user defined in Containerfile
   "containerEnv": {
-    "SHELL": "/bin/bash"
+    "SHELL": "/bin/bash" // Ensures bash is the default shell
   },
   // "customizations": {
   //  "devpod": {
-  //    "provider": "docker"
+  //    "provider": "docker"  // Uncomment if using DevPod with Docker provider
   //   }
   // },
   "portsAttributes": {
     "8000": {
       "label": "Deno Server",
-      "onAutoForward": "notify"
+      "onAutoForward": "notify" // Notifies when port 8000 is forwarded
     }
   },
-  "runArgs": ["-p", "8000:8000", "--userns=keep-id"],
-  "workspaceFolder": "/home/dev/workspace",
-  "postCreateCommand": "deno install"
+  "runArgs": [
+    "-p",
+    "8000:8000", // Maps port 8000 for Deno server
+    "--userns=keep-id" // Keeps host UID/GID mapping for file permissions
+  ],
+  "workspaceFolder": "/home/dev/workspace", // Sets the working directory
+  "postCreateCommand": "deno install" // Runs after container creation to install Deno globally
 }
