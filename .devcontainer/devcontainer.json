@@ -1,23 +1,10 @@
 {
-  "name": "deno-neovim-devcontainer",
-  // "image": "denoland/deno:debian-2.2.4",
+  "name": "devcontainer",
   "build": {
     "dockerfile": "Containerfile",
     "context": "."
   },
-  "features": {
-    //   "ghcr.io/devcontainers/features/git:1": {
-    //     "version": "latest"
-    //   },
-    //   "ghcr.io/sinhaaritro/devcontainer-feature/neovim": {
-    //     "version": "latest",
-    //     "skipUpdate": true
-    //  },
-    //   "../../devcontainer-feature/src/neovim": {
-    //    "version": "latest",
-    //    "skipUpdate": true
-    //   }
-  },
+  "features": {},
   "remoteUser": "dev",
   "containerEnv": {
     "SHELL": "/bin/bash"
@@ -34,6 +21,6 @@
     }
   },
   "runArgs": ["-p", "8000:8000", "--userns=keep-id"],
-  "workspaceFolder": "/home/dev/workspace"
-  // "postCreateCommand": "deno install"
+  "workspaceFolder": "/home/dev/workspace",
+  "postCreateCommand": "deno install"
 }

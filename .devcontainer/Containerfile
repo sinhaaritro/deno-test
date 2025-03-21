@@ -12,20 +12,35 @@ ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=1000
 
-# Install base tools, create user, and set up workspace in one layer
-RUN apt-get update \
-    && apt-get install -y curl unzip \
-    && rm -rf /var/lib/apt/lists/* \
+RUN \
+    echo "Update and install base package lists" \
+    && apt-get update \
+    && apt-get install -y curl jq unzip nodejs npm luarocks \
+    && echo "Fetch and download the latest Neovim version tag with validation" \
+    && curl -fsSL "https://api.github.com/repos/neovim/neovim/releases/latest" | jq -r '.tag_name' > /tmp/nvim_version \
+    && [ -s /tmp/nvim_version ] || (echo "Error: Failed to fetch Neovim version" && exit 1) \
+    && echo "Fetched Neovim version: $(cat /tmp/nvim_version)" \
+    && curl -fsSL "https://github.com/neovim/neovim/releases/download/$(cat /tmp/nvim_version)/nvim-linux-x86_64.tar.gz" -o /tmp/nvim.tar.gz \
+    && echo "Extract Neovim tarball" \
+    && tar -xzf /tmp/nvim.tar.gz -C /usr/local --strip-components=1 \
+    && echo "Neovim installed successfully: $(nvim --version | head -n 1)" \
+    && echo "Clean up temporary files" \
+    && rm -rf /tmp/nvim.tar.gz /tmp/nvim_version /tmp/* /var/lib/apt/lists/* \
+    && echo "Create user and set up workspace" \
     && groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME --shell /usr/bin/bash \
     && mkdir -p /home/$USERNAME/workspace \
     && chown -R $USER_UID:$USER_GID /home/$USERNAME/workspace 
 
-# Install Deno and configure directories in one layer
-RUN curl -fsSL https://deno.land/install.sh | sh \
+RUN \
+    echo "Install Deno and configure directories in one layer" \
+    && curl -fsSL https://deno.land/install.sh | sh \
     && mv /root/.deno/bin/deno /usr/local/bin/deno \
+    && echo "Create /deno-dir/" \
     && mkdir -p /deno-dir \
-    && chown -R $USER_UID:$USER_GID /deno-dir 
+    && chown -R $USER_UID:$USER_GID /deno-dir \
+    && echo "Clean up temporary files" \
+    && rm -rf /tmp/* 
 
 # Switch to the 'dev' user
 USER $USERNAME
