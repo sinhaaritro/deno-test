@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: deno-app:production
+    ports:
+      - "8000:8000"
+    environment:
+      - DENO_DIR=/deno-dir/
+    volumes:
+      - deno-data:/deno-dir
+    restart: unless-stopped
+    user: "1001:1001"  # Matches USER_UID:USER_GID from Containerfile
+    command: ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "main.ts"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  deno-data:
+    driver: local
